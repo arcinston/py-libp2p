@@ -94,15 +94,17 @@ class AutoNATService:
         finally:
             await stream.close()
 
-    async def _handle_request(self, request: Union[bytes, Message]) -> Message:
+    async def _handle_request(
+        self, request: Union[bytes, bytearray, memoryview, Message]
+    ) -> Message:
         """
         Process an AutoNAT protocol request.
 
         Parameters
         ----------
-        request : Union[bytes, Message]
-            The request data to be processed, either as raw bytes or a
-            pre-parsed Message object.
+        request : Union[bytes, bytearray, memoryview, Message]
+            The request data to be processed, either as raw bytes, bytearray,
+            memoryview, or a pre-parsed Message object.
 
         Returns
         -------
@@ -112,13 +114,18 @@ class AutoNATService:
             recognized.
 
         """
-        if isinstance(request, bytes):
+        if isinstance(request, (bytes, bytearray, memoryview)):
+            # Convert memoryview or bytearray to bytes
+            if isinstance(request, memoryview):
+                request_bytes = request.tobytes()
+            else:
+                request_bytes = bytes(request)
             message = Message()
-            message.ParseFromString(request)
+            message.ParseFromString(request_bytes)
         else:
             message = request
 
-        if message.type == Type.Value("DIAL"):
+        if hasattr(message, "type") and message.type == Type.Value("DIAL"):
             response = await self._handle_dial(message)
             return response
 

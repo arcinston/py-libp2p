@@ -76,12 +76,12 @@ jobs:
             echo "Baseline 'actual_baseline_errors.txt' prepared from downloaded main artifact."
           else
             echo "::warning title=Main Baseline Not Found::Artifact 'main-type-errors-baseline' from 'update-main-baseline.yml' (main branch) not found or download failed. Proceeding with an empty baseline. All current errors will be treated as new."
-            touch actual_baseline_errors.txt # Create empty baseline if not found
+            touch actual_baseline_errors.txt
           fi
           echo "pr_baseline_path=actual_baseline_errors.txt" >> $GITHUB_OUTPUT
 
       - name: Upload PR typecheck log and current errors (for debugging)
-        if: always() # Upload even if previous steps fail, for debugging
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pr-typecheck-output

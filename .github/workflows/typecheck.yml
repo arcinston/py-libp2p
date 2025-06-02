@@ -96,7 +96,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const core = require('@actions/core');
             const github = require('@actions/github'); // Required for github.rest
             const { owner, repo } = context.repo;
             const pr_number = context.payload.pull_request.number;

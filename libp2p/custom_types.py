@@ -38,10 +38,10 @@ from libp2p.pubsub.pb import (
 )
 
 TProtocol = NewType("TProtocol", str)
-StreamHandlerFn = Callable[["INetStream"], Awaitable[None]]
+StreamHandlerFn = Callable[[INetStream], Awaitable[None]]
 THandler = Callable[[ReadWriteCloser], Awaitable[None]]
-TSecurityOptions = Mapping[TProtocol, "ISecureTransport"]
-TMuxerClass = type["IMuxedConn"]
+TSecurityOptions = Mapping[TProtocol, ISecureTransport]
+TMuxerClass = type[IMuxedConn]
 TMuxerOptions = Mapping[TProtocol, TMuxerClass]
 SyncValidatorFn = Callable[[ID, rpc_pb2.Message], bool]
 AsyncValidatorFn = Callable[[ID, rpc_pb2.Message], Awaitable[bool]]

@@ -68,8 +68,16 @@ class Multiselect(IMultiselectMuxer):
                 raise MultiselectError() from error
 
             if command == "ls":
-                # TODO: handle ls command
-                pass
+                supported_protocols = [
+                    p for p in self.handlers.keys() if p is not None
+                ]
+                response = "\n".join(supported_protocols) + "\n"
+
+                try:
+                    await communicator.write(response)
+                except MultiselectCommunicatorError as error:
+                    raise MultiselectError() from error
+
             else:
                 protocol = TProtocol(command)
                 if protocol in self.handlers:

@@ -91,7 +91,7 @@ jobs:
             actual_baseline_errors.txt
 
       - name: Compare PR errors with main, comment & fail on new
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           # github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

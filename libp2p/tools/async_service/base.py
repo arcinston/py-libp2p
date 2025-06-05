@@ -141,14 +141,13 @@ T = TypeVar("T", bound="BaseFunctionTask")
 
 
 class BaseFunctionTask(BaseTaskWithChildren):
-    @classmethod  
+    @classmethod
     def iterate_tasks(cls, *tasks: TaskAPI) -> Iterable["BaseFunctionTask"]:
         """Iterate over all tasks of this class type and their children recursively."""
         for task in tasks:
-
             if isinstance(task, BaseFunctionTask):
                 yield task
-            
+
             if isinstance(task, TaskWithChildrenAPI):
                 yield from cls.iterate_tasks(*task.children)
 

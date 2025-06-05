@@ -149,17 +149,6 @@ async def test_set_and_remove_topic_validator():
         topic_validator = pubsubs_fsub[0].topic_validators[topic]
         assert not topic_validator.is_async
 
-        topic_1 = "TEST_VALIDATOR_1"
-        topic_2 = "TEST_VALIDATOR_2"
-        topic_3 = "TEST_VALIDATOR_3"
-
-        msg = make_pubsub_msg(
-            origin_id=pubsubs_fsub[0].my_id,
-            topic_ids=[topic_1, topic_2, topic_3],
-            data=b"1234",
-            seqno=b"\x00" * 8,
-        )
-
         # Validate with sync validator
         test_msg = make_pubsub_msg(
             origin_id=IDFactory(),

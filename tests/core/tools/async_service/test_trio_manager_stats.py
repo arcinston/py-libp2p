@@ -4,6 +4,7 @@ import trio
 from libp2p.tools.async_service import (
     Service,
 )
+
 # MAYBE TODO: Replacing trio.testing with pytest.raises.
 from libp2p.tools.async_service.trio_service import TrioManager
 
@@ -38,7 +39,7 @@ async def test_trio_manager_stats():
         manager = TrioManager(service)
         nursery.start_soon(manager.run)
         await manager.wait_started()
-        
+
         try:
             service.run_external_root()
             assert len(manager._root_tasks) == 2
@@ -80,7 +81,7 @@ async def test_trio_manager_stats_does_not_count_main_run_method():
         manager = TrioManager(service)
         nursery.start_soon(manager.run)
         await manager.wait_started()
-        
+
         try:
             with trio.fail_after(1):
                 await ready.wait()

@@ -58,6 +58,10 @@ class TrioStreamAdapter(IRawConnection):
     async def close(self) -> None:
         logging.debug("Closing stream")
 
+    def get_remote_address(self) -> Optional[tuple[str, int]]:
+        # Return None since this is a test adapter without real network info
+        return None
+
 
 @pytest.fixture
 def key_pair():

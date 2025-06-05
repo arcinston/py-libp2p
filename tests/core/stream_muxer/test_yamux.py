@@ -1,5 +1,8 @@
 import logging
 import struct
+from typing import (
+    Optional,
+)
 
 import pytest
 import trio
@@ -16,6 +19,9 @@ from libp2p.peer.id import (
 from libp2p.security.insecure.transport import (
     InsecureTransport,
 )
+from libp2p.abc import (
+    IRawConnection,
+)
 from libp2p.stream_muxer.yamux.yamux import (
     FLAG_SYN,
     GO_AWAY_PROTOCOL_ERROR,
@@ -29,18 +35,19 @@ from libp2p.stream_muxer.yamux.yamux import (
 )
 
 
-class TrioStreamAdapter:
-    def __init__(self, send_stream, receive_stream):
+class TrioStreamAdapter(IRawConnection):
+    def __init__(self, send_stream, receive_stream, is_initiator: bool = False):
         self.send_stream = send_stream
         self.receive_stream = receive_stream
+        self.is_initiator = is_initiator
 
-    async def write(self, data):
+    async def write(self, data: bytes) -> None:
         logging.debug(f"Writing {len(data)} bytes")
         with trio.move_on_after(2):
             await self.send_stream.send_all(data)
 
-    async def read(self, n=-1):
-        if n == -1:
+    async def read(self, n: Optional[int] = None) -> bytes:
+        if n is None or n == -1:
             raise ValueError("Reading unbounded not supported")
         logging.debug(f"Attempting to read {n} bytes")
         with trio.move_on_after(2):
@@ -48,7 +55,7 @@ class TrioStreamAdapter:
             logging.debug(f"Read {len(data)} bytes")
             return data
 
-    async def close(self):
+    async def close(self) -> None:
         logging.debug("Closing stream")
 
 
@@ -68,8 +75,8 @@ async def secure_conn_pair(key_pair, peer_id):
     client_send, server_receive = memory_stream_pair()
     server_send, client_receive = memory_stream_pair()
 
-    client_rw = TrioStreamAdapter(client_send, client_receive)
-    server_rw = TrioStreamAdapter(server_send, server_receive)
+    client_rw = TrioStreamAdapter(client_send, client_receive, is_initiator=True)
+    server_rw = TrioStreamAdapter(server_send, server_receive, is_initiator=False)
 
     insecure_transport = InsecureTransport(key_pair)
 

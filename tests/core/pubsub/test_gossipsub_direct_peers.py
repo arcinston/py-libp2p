@@ -100,8 +100,7 @@ async def test_reject_graft():
 
                 # Gossipsub 1 emits a graft request to Gossipsub 0
                 router_obj = pubsubs_gsub_0[0].router
-                if not isinstance(router_obj, GossipSub):
-                    return
+                assert isinstance(router_obj, GossipSub)
                 await router_obj.emit_graft(topic, host_1.get_id())
 
                 await trio.sleep(1)

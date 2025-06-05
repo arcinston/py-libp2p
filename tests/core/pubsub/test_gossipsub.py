@@ -82,8 +82,7 @@ async def test_join():
 async def test_leave():
     async with PubsubFactory.create_batch_with_gossipsub(1) as pubsubs_gsub:
         router = pubsubs_gsub[0].router
-        if not isinstance(router, GossipSub):
-            return
+        assert isinstance(router, GossipSub)
         gossipsub = router
         topic = "test_leave"
 
@@ -439,8 +438,7 @@ async def test_gossip_heartbeat(initial_peer_count, monkeypatch):
         fake_peer_ids = [IDFactory() for _ in range(total_peer_count)]
         peer_protocol = {peer_id: PROTOCOL_ID for peer_id in fake_peer_ids}
         router_obj = pubsubs_gsub[0].router
-        if not isinstance(router_obj, GossipSub):
-            return
+        assert isinstance(router_obj, GossipSub)
         router = router_obj
         monkeypatch.setattr(router, "peer_protocol", peer_protocol)
 

@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import Optional
 
 import pytest
 import trio
@@ -180,7 +180,7 @@ async def test_mplex_stream_async_context_manager_write_after_close():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager_write_after_close():
-    muxed_conn = cast(Yamux, MockMuxedConn())
+    muxed_conn = Yamux(DummySecuredConn(), DUMMY_PEER_ID)
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     async with stream as s:
         assert s is stream

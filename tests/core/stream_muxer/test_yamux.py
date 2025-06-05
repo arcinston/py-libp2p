@@ -10,6 +10,9 @@ from trio.testing import (
     memory_stream_pair,
 )
 
+from libp2p.abc import (
+    IRawConnection,
+)
 from libp2p.crypto.ed25519 import (
     create_new_key_pair,
 )
@@ -18,9 +21,6 @@ from libp2p.peer.id import (
 )
 from libp2p.security.insecure.transport import (
     InsecureTransport,
-)
-from libp2p.abc import (
-    IRawConnection,
 )
 from libp2p.stream_muxer.yamux.yamux import (
     FLAG_SYN,

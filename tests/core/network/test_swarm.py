@@ -10,11 +10,11 @@ from trio.testing import (
 from libp2p import (
     new_swarm,
 )
-from libp2p.network.swarm import (
-    Swarm,
-)
 from libp2p.network.exceptions import (
     SwarmException,
+)
+from libp2p.network.swarm import (
+    Swarm,
 )
 from libp2p.tools.utils import (
     connect_swarm,

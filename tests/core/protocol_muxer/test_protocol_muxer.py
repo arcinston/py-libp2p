@@ -3,9 +3,6 @@ import pytest
 from libp2p.custom_types import (
     TProtocol,
 )
-from libp2p.host.exceptions import (
-    StreamFailure,
-)
 from libp2p.tools.utils import (
     create_echo_stream_handler,
 )
@@ -68,7 +65,6 @@ async def test_single_protocol_fails(security_protocol):
         )
 
 
-
 @pytest.mark.trio
 async def test_multiple_protocol_first_is_valid_succeeds(security_protocol):
     expected_selected_protocol = PROTOCOL_ECHO
@@ -98,7 +94,12 @@ async def test_multiple_protocol_second_is_valid_succeeds(security_protocol):
 @pytest.mark.trio
 async def test_multiple_protocol_fails(security_protocol):
     protocols_for_client = [PROTOCOL_ROCK, PROTOCOL_FOO, TProtocol("/bar/1.0.0")]
-    protocols_for_listener = [TProtocol("/aspyn/1.0.0"), TProtocol("/rob/1.0.0"), TProtocol("/zx/1.0.0"), TProtocol("/alex/1.0.0")]
+    protocols_for_listener = [
+        TProtocol("/aspyn/1.0.0"),
+        TProtocol("/rob/1.0.0"),
+        TProtocol("/zx/1.0.0"),
+        TProtocol("/alex/1.0.0"),
+    ]
 
     # Expect that protocol negotiation fails when no common protocols exist
     with pytest.raises(Exception):

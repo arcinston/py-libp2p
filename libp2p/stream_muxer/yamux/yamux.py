@@ -471,7 +471,7 @@ class Yamux(IMuxedConn):
                 self.stream_events[stream_id] = trio.Event()
             except KeyError:
                 raise MuxedStreamEOF("Stream was removed")
-        
+
         # This line should never be reached, but satisfies the type checker
         raise MuxedStreamEOF("Unexpected end of read_stream")
 

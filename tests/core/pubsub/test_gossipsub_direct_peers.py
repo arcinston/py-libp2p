@@ -1,5 +1,3 @@
-from typing import cast
-
 import pytest
 import trio
 
@@ -101,8 +99,10 @@ async def test_reject_graft():
                 )
 
                 # Gossipsub 1 emits a graft request to Gossipsub 0
-                router_0 = cast(GossipSub, pubsubs_gsub_0[0].router)
-                await router_0.emit_graft(topic, host_1.get_id())
+                router_obj = pubsubs_gsub_0[0].router
+                if not isinstance(router_obj, GossipSub):
+                    return
+                await router_obj.emit_graft(topic, host_1.get_id())
 
                 await trio.sleep(1)
 

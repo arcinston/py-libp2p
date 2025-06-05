@@ -1,18 +1,14 @@
 from contextlib import (
     contextmanager,
 )
+import inspect
 from typing import (
     NamedTuple,
-    cast,
 )
 
 import pytest
 import trio
 
-from libp2p.custom_types import (
-    AsyncValidatorFn,
-    SyncValidatorFn,
-)
 from libp2p.exceptions import (
     ValidationError,
 )
@@ -180,8 +176,14 @@ async def test_set_and_remove_topic_validator():
             data=b"test",
             seqno=b"\x00" * 8,
         )
-        async_validator_fn = cast(AsyncValidatorFn, topic_validator.validator)
-        await async_validator_fn(IDFactory(), test_msg)
+        validator = topic_validator.validator
+        if topic_validator.is_async:
+            import inspect
+
+            if inspect.iscoroutinefunction(validator):
+                await validator(IDFactory(), test_msg)
+        else:
+            validator(IDFactory(), test_msg)
 
         assert is_async_validator_called
         assert not is_sync_validator_called
@@ -225,12 +227,12 @@ async def test_get_msg_validators():
 
         topic_validators = pubsubs_fsub[0].get_msg_validators(msg)
         for topic_validator in topic_validators:
+            validator = topic_validator.validator
             if topic_validator.is_async:
-                async_validator_fn = cast(AsyncValidatorFn, topic_validator.validator)
-                await async_validator_fn(IDFactory(), msg)
+                if inspect.iscoroutinefunction(validator):
+                    await validator(IDFactory(), msg)
             else:
-                sync_validator_fn = cast(SyncValidatorFn, topic_validator.validator)
-                sync_validator_fn(IDFactory(), msg)
+                validator(IDFactory(), msg)
 
         assert calls[0] == 2
         assert calls[1] == 1

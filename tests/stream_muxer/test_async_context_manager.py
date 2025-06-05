@@ -1,8 +1,11 @@
-from typing import cast
+from typing import Optional, cast
 
 import pytest
 import trio
 
+from libp2p.abc import ISecureConn
+from libp2p.crypto.keys import PrivateKey, PublicKey
+from libp2p.peer.id import ID
 from libp2p.stream_muxer.exceptions import (
     MuxedStreamClosed,
     MuxedStreamError,
@@ -19,12 +22,14 @@ from libp2p.stream_muxer.yamux.yamux import (
     YamuxStream,
 )
 
+DUMMY_PEER_ID = ID(b"dummy_peer_id")
 
-class DummySecuredConn:
+
+class DummySecuredConn(ISecureConn):
     async def write(self, data: bytes) -> None:
         pass
 
-    async def read(self, n: int) -> bytes:
+    async def read(self, n: Optional[int] = -1) -> bytes:
         return b""
 
     async def close(self) -> None:
@@ -35,6 +40,18 @@ class DummySecuredConn:
 
     def get_local_address(self):
         return None
+
+    def get_local_peer(self) -> ID:
+        return ID(b"local")
+
+    def get_local_private_key(self) -> PrivateKey:
+        return PrivateKey()  # Dummy key
+
+    def get_remote_peer(self) -> ID:
+        return ID(b"remote")
+
+    def get_remote_public_key(self) -> PublicKey:
+        return PublicKey()  # Dummy key
 
 
 class MockMuxedConn:
@@ -53,9 +70,37 @@ class MockMuxedConn:
         return None
 
 
+class MockMplexMuxedConn:
+    def __init__(self):
+        self.streams_lock = trio.Lock()
+        self.event_shutting_down = trio.Event()
+        self.event_closed = trio.Event()
+        self.event_started = trio.Event()
+
+    async def send_message(self, flag, data, stream_id):
+        pass
+
+    def get_remote_address(self):
+        return None
+
+
+class MockYamuxMuxedConn:
+    def __init__(self):
+        self.secured_conn = DummySecuredConn()
+        self.event_shutting_down = trio.Event()
+        self.event_closed = trio.Event()
+        self.event_started = trio.Event()
+
+    async def send_message(self, flag, data, stream_id):
+        pass
+
+    def get_remote_address(self):
+        return None
+
+
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager():
-    muxed_conn = cast(Mplex, MockMuxedConn())
+    muxed_conn = Mplex(DummySecuredConn(), DUMMY_PEER_ID)
     stream_id = StreamID(1, True)  # Use real StreamID
     stream = MplexStream(
         name="test_stream",
@@ -73,7 +118,7 @@ async def test_mplex_stream_async_context_manager():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager():
-    muxed_conn = cast(Yamux, MockMuxedConn())
+    muxed_conn = Yamux(DummySecuredConn(), DUMMY_PEER_ID)
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     async with stream as s:
         assert s is stream
@@ -85,7 +130,7 @@ async def test_yamux_stream_async_context_manager():
 
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager_with_error():
-    muxed_conn = cast(Mplex, MockMuxedConn())
+    muxed_conn = Mplex(DummySecuredConn(), DUMMY_PEER_ID)
     stream_id = StreamID(1, True)
     stream = MplexStream(
         name="test_stream",
@@ -105,7 +150,7 @@ async def test_mplex_stream_async_context_manager_with_error():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager_with_error():
-    muxed_conn = cast(Yamux, MockMuxedConn())
+    muxed_conn = Yamux(DummySecuredConn(), DUMMY_PEER_ID)
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     with pytest.raises(ValueError):
         async with stream as s:
@@ -119,7 +164,7 @@ async def test_yamux_stream_async_context_manager_with_error():
 
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager_write_after_close():
-    muxed_conn = cast(Mplex, MockMuxedConn())
+    muxed_conn = Mplex(DummySecuredConn(), DUMMY_PEER_ID)
     stream_id = StreamID(1, True)
     stream = MplexStream(
         name="test_stream",

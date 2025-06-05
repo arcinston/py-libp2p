@@ -1,3 +1,5 @@
+from typing import cast
+
 import pytest
 import trio
 
@@ -8,17 +10,31 @@ from libp2p.stream_muxer.exceptions import (
 from libp2p.stream_muxer.mplex.datastructures import (
     StreamID,
 )
+from libp2p.stream_muxer.mplex.mplex import Mplex
 from libp2p.stream_muxer.mplex.mplex_stream import (
     MplexStream,
 )
 from libp2p.stream_muxer.yamux.yamux import (
+    Yamux,
     YamuxStream,
 )
 
 
 class DummySecuredConn:
-    async def write(self, data):
+    async def write(self, data: bytes) -> None:
         pass
+
+    async def read(self, n: int) -> bytes:
+        return b""
+
+    async def close(self) -> None:
+        pass
+
+    def get_remote_address(self):
+        return None
+
+    def get_local_address(self):
+        return None
 
 
 class MockMuxedConn:
@@ -39,7 +55,7 @@ class MockMuxedConn:
 
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Mplex, MockMuxedConn())
     stream_id = StreamID(1, True)  # Use real StreamID
     stream = MplexStream(
         name="test_stream",
@@ -57,7 +73,7 @@ async def test_mplex_stream_async_context_manager():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Yamux, MockMuxedConn())
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     async with stream as s:
         assert s is stream
@@ -69,7 +85,7 @@ async def test_yamux_stream_async_context_manager():
 
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager_with_error():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Mplex, MockMuxedConn())
     stream_id = StreamID(1, True)
     stream = MplexStream(
         name="test_stream",
@@ -89,7 +105,7 @@ async def test_mplex_stream_async_context_manager_with_error():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager_with_error():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Yamux, MockMuxedConn())
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     with pytest.raises(ValueError):
         async with stream as s:
@@ -103,7 +119,7 @@ async def test_yamux_stream_async_context_manager_with_error():
 
 @pytest.mark.trio
 async def test_mplex_stream_async_context_manager_write_after_close():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Mplex, MockMuxedConn())
     stream_id = StreamID(1, True)
     stream = MplexStream(
         name="test_stream",
@@ -119,7 +135,7 @@ async def test_mplex_stream_async_context_manager_write_after_close():
 
 @pytest.mark.trio
 async def test_yamux_stream_async_context_manager_write_after_close():
-    muxed_conn = MockMuxedConn()
+    muxed_conn = cast(Yamux, MockMuxedConn())
     stream = YamuxStream(stream_id=1, conn=muxed_conn, is_initiator=True)
     async with stream as s:
         assert s is stream

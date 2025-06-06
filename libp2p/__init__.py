@@ -158,7 +158,7 @@ def new_swarm(
     peerstore_opt: Optional[IPeerStore] = None,
     muxer_preference: Optional[Literal["YAMUX", "MPLEX"]] = None,
     listen_addrs: Optional[Sequence[multiaddr.Multiaddr]] = None,
-) -> INetworkService:
+) -> Swarm:
     """
     Create a swarm instance based on the parameters.
 

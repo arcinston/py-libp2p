@@ -1,9 +1,8 @@
 # Copied from https://github.com/ethereum/async-service
 import pytest
 import trio
-from trio.testing import (
-    RaisesGroup,
-)
+import trio.testing
+RaisesGroup = getattr(trio.testing, 'RaisesGroup')
 
 from libp2p.tools.async_service import (
     LifecycleError,

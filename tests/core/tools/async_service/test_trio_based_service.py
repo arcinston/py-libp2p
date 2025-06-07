@@ -11,10 +11,9 @@ else:
 
 import pytest
 import trio
-from trio.testing import (
-    Matcher,
-    RaisesGroup,
-)
+import trio.testing
+RaisesGroup = getattr(trio.testing, 'RaisesGroup')
+Matcher = getattr(trio.testing, 'Matcher')
 
 from libp2p.tools.async_service import (
     DaemonTaskExit,

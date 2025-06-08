@@ -2,16 +2,14 @@ from collections.abc import (
     AsyncIterator,
     Sequence,
 )
-from contextlib import (
-    asynccontextmanager,
-)
+from contextlib import asynccontextmanager
 import logging
 from typing import (
     TYPE_CHECKING,
     Optional,
 )
 
-import multiaddr
+from multiaddr import Multiaddr
 
 from libp2p.abc import (
     IHost,
@@ -88,14 +86,14 @@ class BasicHost(IHost):
     def __init__(
         self,
         network: INetworkService,
-        default_protocols: Optional["OrderedDict[TProtocol, StreamHandlerFn]"] = None,
+        default_protocols: "OrderedDict[Optional[TProtocol], Optional[StreamHandlerFn]] | None" = None,  # noqa: E501
     ) -> None:
         self._network = network
         self._network.set_stream_handler(self._swarm_stream_handler)
         self.peerstore = self._network.peerstore
         # Protocol muxing
         default_protocols = default_protocols or get_default_protocols(self)
-        self.multiselect = Multiselect(dict(default_protocols.items()))
+        self.multiselect = Multiselect(default_protocols)
         self.multiselect_client = MultiselectClient()
 
     def get_id(self) -> ID:
@@ -128,14 +126,14 @@ class BasicHost(IHost):
         """
         return self.multiselect
 
-    def get_addrs(self) -> list[multiaddr.Multiaddr]:
+    def get_addrs(self) -> list[Multiaddr]:
         """
         :return: all the multiaddr addresses this host is listening to
         """
         # TODO: We don't need "/p2p/{peer_id}" postfix actually.
-        p2p_part = multiaddr.Multiaddr(f"/p2p/{self.get_id()!s}")
+        p2p_part = Multiaddr(f"/p2p/{self.get_id()!s}")
 
-        addrs: list[multiaddr.Multiaddr] = []
+        addrs: list[Multiaddr] = []
         for transport in self._network.listeners.values():
             for addr in transport.get_addrs():
                 addrs.append(addr.encapsulate(p2p_part))
@@ -148,8 +146,8 @@ class BasicHost(IHost):
         return list(self._network.connections.keys())
 
     @asynccontextmanager
-    async def run(
-        self, listen_addrs: Sequence[multiaddr.Multiaddr]
+    async def run(  # pyrefly: ignore
+        self, listen_addrs: Sequence[Multiaddr]
     ) -> AsyncIterator[None]:
         """
         Run the host instance and listen to ``listen_addrs``.

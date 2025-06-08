@@ -4,10 +4,12 @@ from abc import (
 )
 from collections.abc import (
     AsyncIterable,
+    AsyncIterator,
     Iterable,
     KeysView,
     Sequence,
 )
+import contextlib
 from types import (
     TracebackType,
 )
@@ -1177,8 +1179,9 @@ class IHost(ABC):
         :return: List of peer IDs that have active connections
         """
 
+    @contextlib.asynccontextmanager
     @abstractmethod
-    def run(self, listen_addrs: Sequence[Multiaddr]) -> AsyncContextManager[None]:
+    async def run(self, listen_addrs: Sequence[Multiaddr]) -> AsyncIterator[None]:
         """
         Run the host and start listening on the specified multiaddresses.
 
@@ -1188,6 +1191,7 @@ class IHost(ABC):
             A sequence of multiaddresses on which the host should listen.
 
         """
+        yield
 
     @abstractmethod
     def set_stream_handler(

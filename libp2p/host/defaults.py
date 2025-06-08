@@ -3,6 +3,7 @@ from collections import (
 )
 from typing import (
     TYPE_CHECKING,
+    Optional,
 )
 
 from libp2p.abc import (
@@ -24,7 +25,9 @@ if TYPE_CHECKING:
     )
 
 
-def get_default_protocols(host: IHost) -> "OrderedDict[TProtocol, StreamHandlerFn]":
+def get_default_protocols(
+    host: IHost,
+) -> "OrderedDict[Optional[TProtocol], Optional[StreamHandlerFn]]":
     return OrderedDict(
         ((IdentifyID, identify_handler_for(host)), (PingID, handle_ping))
     )

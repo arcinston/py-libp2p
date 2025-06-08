@@ -4,8 +4,6 @@ import trio
 from libp2p.tools.async_service import (
     Service,
 )
-
-# MAYBE TODO: Replacing trio.testing with pytest.raises.
 from libp2p.tools.async_service.trio_service import TrioManager
 
 

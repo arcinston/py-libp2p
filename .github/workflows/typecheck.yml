@@ -82,7 +82,11 @@ jobs:
 
             // Errors are passed as a multi-line string from the previous step's output
             const raw_errors_output = process.env.TYPECHECK_ERRORS_FROM_STEP;
+            core.info(`Raw errors from step output: '${raw_errors_output}'`);
+
             const current_errors = raw_errors_output.trim().split('\n').filter(Boolean);
+            core.info(`Parsed errors: ${JSON.stringify(current_errors)}`);
+            core.info(`Number of parsed errors: ${current_errors.length}`);
 
             const comment_body_lines = [];
 

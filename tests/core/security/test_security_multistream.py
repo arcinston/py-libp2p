@@ -26,6 +26,8 @@ async def perform_simple_test(assertion_func, security_protocol):
     async with host_pair_factory(security_protocol=security_protocol) as hosts:
         # Use a different approach to verify connections
         # Wait for both sides to establish connection
+        conn_0 = None
+        conn_1 = None
         for _ in range(5):  # Try up to 5 times
             try:
                 # Check if connection established from host0 to host1
@@ -48,8 +50,8 @@ async def perform_simple_test(assertion_func, security_protocol):
         assert conn_1 is not None, "Failed to establish connection from host1 to host0"
 
         # Perform assertion
-        assertion_func(conn_0.muxed_conn.secured_conn)
-        assertion_func(conn_1.muxed_conn.secured_conn)
+        assertion_func(conn_0.muxed_conn)
+        assertion_func(conn_1.muxed_conn)
 
 
 @pytest.mark.trio

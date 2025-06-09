@@ -50,6 +50,7 @@ async def perform_simple_test(assertion_func, security_protocol):
         assert conn_1 is not None, "Failed to establish connection from host1 to host0"
 
         # Perform assertion
+        # Now, assertion_func receives the muxed_conn, so we need to pass the secured_conn from it
         assertion_func(conn_0.muxed_conn)
         assertion_func(conn_1.muxed_conn)
 
@@ -67,15 +68,17 @@ async def perform_simple_test(assertion_func, security_protocol):
 async def test_single_insecure_security_transport_succeeds(
     security_protocol, transport_type
 ):
-    def assertion_func(conn):
-        assert isinstance(conn, transport_type)
+    # This assertion_func now expects `muxed_conn` and accesses `secured_conn` from it
+    def assertion_func(muxed_conn):
+        assert isinstance(muxed_conn.secured_conn, transport_type)
 
     await perform_simple_test(assertion_func, security_protocol)
 
 
 @pytest.mark.trio
 async def test_default_insecure_security():
-    def assertion_func(conn):
-        assert isinstance(conn, InsecureSession)
+    # This assertion_func now expects `muxed_conn` and accesses `secured_conn` from it
+    def assertion_func(muxed_conn):
+        assert isinstance(muxed_conn.secured_conn, InsecureSession)
 
     await perform_simple_test(assertion_func, None)
